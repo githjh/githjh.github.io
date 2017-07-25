@@ -1,9 +1,13 @@
 ---
 layout: post
-title: 다수는 충분하지 않다: 비트 코인 채굴은 취약하다
+title: Teechan Channels Using Trusted Execution Environments 
 categories: others
 ---
 
+
+<p><small>This demo page has been used from <a href="http://jasonm23.github.io/markdown-css-themes/" target="_blank">http://jasonm23.github.io/markdown-css-themes/</a>.</small></p>
+
+<h3> 초록 </h3>
 <h3> 초록 </h3>
 
 Bitcoin 암호화폐는 블록 체인이라고하는 공개 로그에 트랜잭션을 기록한다. 비트코인의 보안은 광부(miner)라고 불리는 참가자가 실행하는 블록 체인을 유지 관리하는 분산 프로토콜에 크게 달려있다. 기존의 지혜는 광업 프로토콜이 incentive-compatible 하고 소수 집단을 공모하는 것에 대비해 안전하다는 것을 주장한다. 즉, 광부에게 규정대로 프로토콜을 따를 것을 장려한다. 
@@ -94,19 +98,6 @@ Bitcoin은 분산적이고 분산 된 암호화 통화이다 [8, 7, 23, 6]. Bitc
 
 상태 머신의 각 상태 전이와 관련된 빈도를 고려하고 해당 보상을 계산하여 이기적 광산에서 예상되는 보상을 분석 할 수 있다. 다양한 사례를 살펴보고 상태 전환을 유발하는 관련 이벤트를 설명합시다. 풀의 길이가 1 개인 사설 브랜치가 있고 다른 블록이 광업 블록 인 경우 풀은 즉시 브랜치를 게시하여 길이가 1 인 두 개의 공용 브랜치가됩니다. 이기적인 풀의 광부는 모두 풀의 브랜치에 있습니다. 왜냐하면 후속 블록 이 지점에 대한 발견은 수영장에 대한 보상을 줄 것입니다. 정직한 광부는 표준 Bitcoin 프로토콜 구현에 따라 처음 들어 봤던 지점에서 광산을 사용합니다. 우리는 수영장 블록에서 광산을 선택하는 정직한 광부의 비율을 γ로 표시하고 다른 지점에있는 다른 광산 광부 중 다른 광부 (1-γ)를 나타냅니다.
 
-
-<!--
-3.5 코인 연령 누적 공격
-
-이 공격은 피어 코인과 사용자의 지분을 측정하기 위해 부를 대신 동전 대신 사용하는 시스템에 국한됩니다. Peercoin 프로토콜의 첫 번째 버전에서는 동전 연령이 제한되었습니다. 즉, 충분히 길게 기다리면 공격자가 네트워크를 효과적으로 추월하기에 충분한 시간을 축적 할 수 있습니다. 예를 들어, 모든 동전의 5 %를 소유 한 공격자가 돈을 여러 개의 출력으로 나눠서 UTXO의 나이가 평균보다 10 배가 될 때까지 기다릴 수 있습니다. 그 후, 공격자는 이중 소비 또는 다른 악의적 인 활동을 수행 할 확률이 높은 (각 UTXO가 충분히 작 으면) 여러 블록을 연속적으로 처리 할 수 ​​있습니다. 이 공격을 시도하는 사용자가 여러 명이면 네트워크가 손상 될 수 있습니다. 이후 버전의 Peercoin 프로토콜에서는 UTXO의 나이가 90 일로 제한됩니다. 마찬가지로, 동전 연령 파라미터는 Novacoin과 BlackCoin에서 제한됩니다. 상한선 제거는 누적 공격을 상당히 덜 일으키지 만, (3)의 지분 대신에 동전 시대를 사용함으로써 얻을 수있는 이점을 감소시킵니다.
-
-3.6 사전 계산 공격
-
-A를 높이 h에있는 특정 블록 Bh의 minter 라하자. 즉, A는 Bh에 대응하는 파라미터로 (2)를 만족시킨다. A가 상당한 컴퓨팅 능력을 소유하면, 그는 다음 블록 Bh + 1을 생성 할 수 있도록 블록 Bh의 해시에 영향을 줄 수있다. Bh에 새로운 거래를 추가함으로써 자신을 위해 Bh + 1을 예약하기 위해 A는 모든 계정을 검색하고 허용 된 시간 스탬프 t마다 조건 (2)이 성립하는지 계산합니다. Bh의 해시가 "불량"(bad) 인 경우, 즉 계산 결과 다른 블록이 다음 사용자가 작성한 것으로 표시되면 공격자는 삽입 된 트랜잭션의 매개 변수를 변경하고 다시 시도합니다. 공격자는 공정한 것보다 많은 수수료를 모으기 위해 블록의 긴 체인을 만들 수 있으며 이중 스택을 시도 할 수 있습니다 (블록 체인을 비밀리에 구축 한 다음 한꺼번에 모두 해제하여 올바른 블록 체인을 공격자가 원하는 트랜잭션으로 무시할 수 있음). 거꾸로). 사전 계산 공격의 효과는 공격자의 지분 및 시스템의 총 계정 또는 UTXO 수에 따라 다릅니다. PoW 시스템에서이 공격은 사실상 불가능합니다. 유효한 블록을 생성하는 것보다 "좋은"해시를 가진 블록을 생성하는 데 더 많은 작업이 필요하기 때문입니다. 마찬가지로, 위임 된 PoS 시스템에서, 일련의 블록 서명자는 가장 새로운 블록의 속성에 의해 영향을받을 수 없다. 따라서 이러한 유형의 합의는 사전 계산 공격에 내성이 있습니다.
-
-
-<p><small>This demo page has been used from <a href="http://jasonm23.github.io/markdown-css-themes/" target="_blank">http://jasonm23.github.io/markdown-css-themes/</a>.</small></p>
-
 <h1>A First Level Header</h1>
 
 <h2>A Second Level Header</h2>
@@ -180,7 +171,7 @@ sit amet velit.*   Suspendisse id sem consectetuer libero luctus adipiscing.</p>
 <li>This is a list item with two paragraphs.</li>
 </ul>
 
-ㅇㅁㄴㅇㄹ
+
 <p>This is the second paragraph in the list item. You&rsquo;re
 only required to indent the first line. Lorem ipsum dolor
 sit amet, consectetuer adipiscing elit.</p>
@@ -222,5 +213,3 @@ if __name__ =='__main__':
     img_thread.join()
     print('\nImage of the day downloaded.')
 {% endhighlight %}
-
--->
