@@ -7,9 +7,6 @@ categories: others
 
 <p><small>This demo page has been used from <a href="http://jasonm23.github.io/markdown-css-themes/" target="_blank">http://jasonm23.github.io/markdown-css-themes/</a>.</small></p>
 
-<h3> 초록 </h3>
-
-
 <h1>A First Level Header</h1>
 
 <h2>A Second Level Header</h2>
