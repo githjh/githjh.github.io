@@ -2,8 +2,6 @@
 layout: post
 title: 다수는 충분하지 않다: 비트 코인 채굴은 취약하다
 categories: others
-html header: <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
 ---
 
 <h3> 초록 </h3>
