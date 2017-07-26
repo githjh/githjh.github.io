@@ -6,241 +6,71 @@ html header: <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/
 
 ---
 
+## 초록.
 
-<h1>A First Level Header</h1>
+블록 체인 프로토콜은 본질적으로 트랜잭션 처리량과 대기 시간이 제한 된다. 성능과 스케일을 다루는 최근의 노력은 오프 체인 (off-chain) 지불 채널에 초점을 맞추고 있다. 이러한 채널은 낮은 대기 시간과 높은 처리량을 달성 할 수 있지만 Bitcoin 블록 체인 위에 안전하게 배포하는 것은 어렵다. 부분적으로는 안전한 구현을 위해서는 기본 프로토콜과 생태계를 변경해야하기 때문이다. 
 
-<h2>A Second Level Header</h2>
+우리는 신뢰할 수있는 실행 환경을 활용하는 전이중 지불 채널 프레임 워크 인 Teechan을 제시합니다. Teechan은 프로토콜을 수정할 필요없이 기존 Bitcoin 블록 체인에 안전하게 배치 할 수 있다. 이는 : (i) 이전 솔루션보다 높은 트랜잭션 처리량과 낮은 트랜잭션 대기 시간을 달성한다. (ii) 잔액이 채널의 크레딧을 초과하지 않는 한 무제한 full-duplex 지불을 가능하게 한다. (iii) 어떤 방향 으로든 지불 당 하나의 메시지 만 보내면 된다. (iv) 임의의 실행 시나리오 하에서 블록 체인상의 최대 두 개의 트랜잭션을 배치한다. 
 
-<h3>A Third Level Header</h3>
+우리는 Bitcoin 네트워크에서 Intel SGX를 사용하여 Teechan 프레임 워크를 구축하고 배포 했다. 우리의 실험에 따르면 네트워크 대기 시간을 제외하고 Teechan은 잠깐 지연된 대기 시간으로 단일 채널에서 초당 2,480 회의 트랜잭션을 처리 할 수 있다.
 
-<h4>A Fourth Level Header</h4>
 
-<h5>A Fifth Level Header</h5>
+## 1 도입
 
-<h6>A Sixed Level Header</h6>
+Bitcoin은 출시 된 이후로 크게 인기를 얻었다. 믿을 수 없는 분산 및 글로벌 금융 네트워크를 통해 자금을 송금 할  수 있는 능력은 많은 산업과 응용 분야를 끌어 들였다. 결과적으로 채택률이 급격히 증가하여 하루에 전송되는 트랜잭션 수가 기하 급수적으로 증가했다 [5]. 이러한 성장은 자연적인 문제를 악화시킨다. Bitcoin을 뒷받침하는 Nakamoto 일치 프로토콜은 트랜잭션 처리량이 근본적으로 제한되어 있고 중요한 트랜잭션 대기 시간을 크게 부과한다 [12]. 또한 광부는 모든 거래 내역을 저장해야하므로 저장 비용을 누적하면 노드를 실행하는 데 드는 비용이 늘어나며 이로 인해 중앙 집중화 압력이 발생한다. 
 
-<p>Now is the time for all good men to come to
-the aid of their country. This is just a
-regular paragraph.</p>
+Bitcoin의 최대 트랜잭션 처리량은 **블록 크기**와 **블록 간격**에 의해 결정된다. 블록 크기가 1 MB이고 평균 블록 간격이 10 분인 Bitcoin은 최대 7 tx / s 를 지원할 수 있다[10]. 최근의 제안은 블록 크기를 늘리거나 블록 간격을 줄이는 것과 같은 매개 변수를 조정하는 것을 제안했다 [17, 1, 16, 38]. 예를 들어 중앙 집중화 병목 현상을 피하고 처리량을 증가시키기 위해 점진적으로 블록을 생성함으로써 프로토콜을 수정한다. 전자의 접근 방식은 Bitcoin을 한 단계 이상 확장 할 수 없으며, 후자의 경우 프로토콜을 변경해야 한다. 프로토콜은 개업자가 과묵하게 만들었습니다. 다른 연구에 따르면 서명 확인 및 저장 대기 시간과 같은 하드웨어 제한이 Bitcoin을 200tx / s로 제한한다고
+ 한다[13]. 
 
-<p>The quick brown fox jumped over the lazy
-dog&rsquo;s back.</p>
+최근의 제안은 신용 카드 처리 (≥ 10,000 tx / s)와 같은 까다로운 작업을 처리하기 위해 지점 간 지불 채널을 사용하여 블록 체인에서 트랜잭션을 이동시키는 데 중점을 두었다 [18, 13, 33]. 지불 채널(Payment channel)은 채널이 설정되거나 해지되는 경우를 제외하고는 블록 체인에 영향을주지 않고 거래가 교환 될 수있는 효율적이고 신뢰없는 자금 이체를 허용한다. 결과적으로, 두 당사자는 대규모 자금 이동에 참여할 수 있으며, 블록 체인에 대한 최종 결과 만 처리 할 수 ​​있다. 이렇게하면 두 엔티티 만 관련되어 트랜잭션 확인 대기 시간이 줄어들고 블록 체인 및 네트워크에 대한 로드가 줄어 든다. 처리량은 채널 수에 따라 선형 적으로 조정 된다. 
 
-<hr />
+양방향 지불 채널의 장점에도 불구하고 기존 프로토콜의 수정을 고려하기 때문에 기존 Bitcoin 네트워크에 안전하게 배포 된 것은 없다. 특히, 서명하기 전에 거래 ID를 설정해야 한다. SegWit [28]는이 문제를 해결하기위한 제안으로 현재 논란이되고 있다 [9]. 
 
-<h3>Header 3</h3>
+우리는 현재의 Bitcoin 네트워크에서 실질적이고 안전하며 효율적인 자금 이체를 지원하는 최초의 고성능 소액 결제 프로토콜 인 Teechan을 제시한다. Duplex Micropayment Channels 및 Lightning Network와 유사한 설계로, Teechan은 다중 서명 시간 잠금 트랜잭션을 사용하여 상호 신뢰하지 않는 두 당사자간에 장기간 지불 채널을 구축 한다. 그러나 근본적으로 기존의 프로토콜과 달리 Trusted Execution Environment (TEE)를 사용하여 프레임 워크가 제공하는 보증을 강화한다. (i) Teechan은 Bitcoin 네트워크를 변경할 필요가 없다. (ii) 잔액이 채널 한도를 초과하지 않는 한 무한한 채널 재사용을 가능하게 한다. (iii) 시간과 공간을 효율적으로 사용할 수 있기 때문에 송금에 대한 쪽지 ​​메시지와 전체 블록 체인에 두 개의 트랜잭션 만 필요합니다. 6 절에서는 선행 기술과의 비교를 자세히 설명한다. 높은 수준에서 TEE의 현재 구현은 코드 및 데이터에 대한 기밀성 및 무결성 보장을 제공 할 수 있지만 프로토콜에 대한 유효성 또는 안전 종료를 보장 할 수는 없다. Teechan은 이러한 제한에도 불구하고 어느 당사자도 현재 순수 잔액보다 더 많은 자금을 이용할 수 없도록 설계되었다. 특히, TEE는 채널을 제어하는 ​​개인 키가 신뢰할 수없는 소프트웨어 나 하드웨어에 노출되지 않도록 보장하여 많은 종류의 잠재적 인 공격을 배제합니다. 이러한 보장은 운영 체제, 하이퍼 바이저 및 BIOS와 같이 권한이 부여 된 손상된 소프트웨어가있는 경우 강력 하다. 또한 RAM, 시스템 버스 및 네트워크를 포함하여 CPU 패키지 외부의 하드웨어를 완벽하게 제어하는 ​​공격자는 당사의 보안 보장을 침해 할 수 없다. 
 
-<blockquote><p>This is a blockquote with two paragraphs. Lorem ipsum dolor sit amet,
-consectetuer adipiscing elit. Aliquam hendrerit mi posuere lectus.
-Vestibulum enim wisi, viverra nec, fringilla in, laoreet vitae, risus.</p>
+전반적으로, 우리 논문은 다음과 같은 기여를 했다. (i) 상호 신뢰하지 않는 당사자 들간의 낮은 대기 시간, 높은 처리량, 안전한 오프 체인 Bitcoin 트랜잭션을위한 실용적인 프레임 워크 인 Teechan을 제시한다. (ii) 인텔 SGX를 TEE로 사용하여이 프레임 워크의 프로토 타입 구현에 대한 자세한 작업을 설명한다. 마지막으로, (iii) Teechan이 단일 지불 채널에서 2,480 tx / s를 달성 할 수 있음을 증명하는 프로토 타입 구현의 예비 성능 측정 값을 제시함으로써 경쟁 할 수있는 시스템 전체 집계 처리량을 가능하게 한다.
 
-<p>Donec sit amet nisl. Aliquam semper ipsum sit amet velit. Suspendisse
-id sem consectetuer libero luctus adipiscing.</p>
+---
+ 
 
-<h2>This is an H2 in a blockquote</h2>
+## 2 배경
 
-<p>This is the first level of quoting.</p>
+이 섹션에서는 Teechan을 뒷받침하는 기술에 대한 배경 지식을 제공한다. 먼저 Bitcoin에 대한 간략한 개요를 제공하고 확장 할 수없는 이유를 탐색 한 다음 Intel SGX에서 제공하는 신뢰할 수있는 실행 환경을 설명한다. 
 
-<blockquote><p>This is nested blockquote.</p></blockquote>
+Bitcoin 
 
-<p>Back to the first level.</p></blockquote>
+Bitcoin [31]은 복제 된 상태 머신을 실행하는 분산 피어 - 투 - 피어 네트워크이다. 네트워크의 각 피어 또는 노드는 Bitcoin 블록 체인의 복사본을 유지 관리하고 네트워크의 모든 계정의 트랜잭션 기록이 포함 된 추가 전용 로그를 업데이트 한다. 사용자는 Bitcoins (BTC)를 전송하기 위해 트랜잭션을 발행하여 네트워크와 상호 작용한다. 유효한 트랜잭션은 미사용 트랜잭션을 입력으로 사용하고 나중에 새 트랜잭션에서 사용될 수있는 새로운 미사용 출력을 작성한다. 사용되지 않은 출력을 보내려면 잠금 스크립트에 의해 지정된 조건이 만족되어야 한다. 일반적으로 주소와 일치하는 서명은 출력을 보내는 사용자가 자금을 청구하는 계정을 소유하고 있음을 증명한다. 더 복잡한 잠금 스크립트는 m-of-n multisig 트랜잭션과 같이 표현할 수 있습니다. 여기서 n 개의 가능한 시그니처 중 m개의 시그니처를 사용하여 자금을 사용한다. 그리고 미래의 시점 이후에만 소비 될 수있는 시간 잠금 트랜잭션도 있다. 
 
-<p>Some of these words <em>are emphasized</em>.
-Some of these words <em>are emphasized also</em>.</p>
+거래는 Bitcoin 원장에 블록으로 알려진 배치로 추가됩니다. 각 블록은 고유 한 ID와 체인을 형성하는 선행 블록의 ID를 포함한다. 네트워크에있는 피어들은 이러한 블록을 생성하여 블록 체인에 추가한다. 마이닝이라고 하는 이 프로세스는 계산 비용이 많이 들고 암호화 퍼즐을 해결해야 한다. 광부는 블록 보상을 통한 노력과 해당 블록의 거래에서 수집 한 거래 수수료를 보상 받는다. Bitcoin 프로토콜은 암호화 퍼즐의 난이도를 동적으로 조정하여 블록이 10 분마다 한 블록의 평균 속도로 블록 체인에 추가되도록합니다. 같은 부모 (포크)를 가진 블록이 여러 개있는 경우 네트워크는 가장 어려운 점이있는 체인을 채택 한다. 
 
-<p>Use two asterisks for <strong>strong emphasis</strong>.
-Or, if you prefer, <strong>use two underscores instead</strong>.</p>
+이 프로토콜 아키텍처는 이중 지출 공격으로부터 보호합니다. 이러한 공격에서 충돌하는 두 거래는 동일한 미사용 출력을 요구합니다. 비트 코인 (Bitcoin) 프로토콜은 광업자가 이러한 트랜잭션 중 최대 하나를 채굴 할 수 있도록 보장하며, 네트워크의 클라이언트는 후속 블록 (일반적으로 6 개)이 포크 및 재구성 [4]을 방지 할 때까지 대기합니다. 
 
-<ul>
-<li>Candy.</li>
-<li>Gum.</li>
-<li>Booze.</li>
-<li>Red</li>
-<li>Green</li>
-<li><p>Blue</p></li>
-<li><p>A list item.</p></li>
-</ul>
+전반적으로, Bitcoin 프로토콜에는 두 가지 근본적인 한계가 있습니다. 첫째, 각 블록의 크기와 블록 생성 속도가 제한되므로 네트워크의 처리량이 근본적으로 제한됩니다. 둘째, 블록 체인의 앞부분(suffix)이 재구성 될 수 있기 때문에 사용자는 거래가 충분히 깊어 질 때까지 기다려야 만하므로 최소한의 대기 시간이 필요하다.
 
+인텔 SGX를 사용하는 신뢰할 수있는 실행 환경 
 
-<p>With multiple paragraphs.</p>
+SGX (Software Guard Extensions) [19, 22, 11]는 기밀성 및 무결성 보장으로 응용 프로그램 코드를 실행할 수 있다. SGX는 CPU의 하드웨어 메커니즘을 사용하여 코드와 데이터를 격리하는 안전한 영역으로 알려진 신뢰할 수있는 실행 환경을 제공한다. 물리적 CPU 패키지가 손상되지 않았다고 가정하면 SGX 영역은 메모리, 시스템 버스, BIOS 및 주변 장치에 대한 액세스를 포함하여 시스템에 물리적으로 액세스하는 공격자로부터 보호된다. 
 
-<ul>
-<li><p>Another item in the list.</p></li>
-<li><p>This is a list item with two paragraphs. Lorem ipsum dolor
-sit amet, consectetuer adipiscing elit. Aliquam hendrerit
-mi posuere lectus.</p></li>
-</ul>
+실행하는 동안 고립 된 코드 및 데이터는 앙클레이브 페이지 영역 캐시 (EPC)라고하는 보호 된 메모리 영역에 상주한다. 주변기기 코드 및 데이터가 칩 상주 형인 경우, CPU 액세스 제어에 의해 보호된다. DRAM 또는 디스크로 플러시 될 때 암호화 된다. 메모리 암호화 엔진은 EPC에서 캐시 라인을 암호화하고 암호 해독하며 ​​DRAM에서 쓰고 가져옵니다. 고립 된 메모리도 무결성 보호되어 수정 및 롤백을 감지하고 앙클레이브가 실행을 종료 할 수 있다. 앙클레이브(enclave) 내에서 실행되는 코드 만 EPC에 액세스 할 수 있다. 하지만 앙클레이브 코드는 앙클레이브 밖의 모든 메모리에 직접 액세스 할 수 있습니다. 앙클레이브 코드는 항상 사용자 모드에서 실행되기 때문에 네트워크 또는 디스크 I / O와 같은 시스템 호출을 통한 호스트 OS와의 상호 작용은 앙클레이브 영역 밖에서 실행되어야합니다. 고립 코드의 호출은 응용 프로그램 프로그래머가 제어 할 수있는 잘 정의 된 진입 점을 통해서만 수행 할 수 있다. 
 
+또한 SGX는 원격 증명 (Remote Attestation) [23]을 지원한다. 이는 특정 앙클레이브를 실행중인 CPU에서 서명 된 명령문을 획득 할 수있게 해준다. 예를 들어 인텔 인증 서비스 (IAS)에서 제공하는 제 3 자 인증 서비스는 이러한 서명 된 진술이 SGX 사양을 준수하는 인증 된 CPU에서 비롯된 것임을 증명할 수 있다.
 
-<p>Vestibulum enim wisi, viverra nec, fringilla in, laoreet
-vitae, risus. Donec sit amet nisl. Aliquam semper ipsum
-sit amet velit.*   Suspendisse id sem consectetuer libero luctus adipiscing.</p>
+---
 
-<ul>
-<li>This is a list item with two paragraphs.</li>
-</ul>
+## 3 모델과 목표
 
+지불 채널은 두 당사자가 높은 처리량, 낮은 대기 시간 및 개인 정보 보호와 자주 상호 작용해야하는 수명이 긴 재정 관계가있는 경우에 적용용된다. Teechan의 핵심 목표는 이러한 엔드 포인트가 신뢰할 수있는 실행 환경을 갖추고 있다고 가정 할 때 두 개의 엔드 포인트 사이에 양방향 지불 채널을 구축하는 것이다.
 
-<p>This is the second paragraph in the list item. You&rsquo;re
-only required to indent the first line. Lorem ipsum dolor
-sit amet, consectetuer adipiscing elit.</p>
 
-<ul>
-<li><p>Another item in the same list.</p></li>
-<li><p>A list item with a bit of <code>code</code> inline.</p></li>
-<li><p>A list item with a blockquote:</p>
+### 위협 모델 및 가정
 
-<blockquote><p>This is a blockquote
-inside a list item.</p></blockquote></li>
-</ul>
+ 우리의 위협 모델은 양 당사자가 자금을 교환하려고하지만 서로를 상호 불신한다고 가정한다. 각 당사자는 잠재적으로 악의적이다. 즉, 자금을 훔치저가 지급을 피하거나 이익을 얻는 경우 계약에서 벗어나려고 시도 할 수 있다. 채널 설정, 실행 및 종료 중 언제든지 각 당사자는 프로토콜에서 임의의 메시지를 삭제, 전송, 기록, 수정 및 재생할 수 있다. 어느 당사자라도 언제든지 채널을 종료 할 수 있으며 실패가 발생할 수 있다. 
 
+각 당사자는 TEE 가능 시스템이 있고 Bitcoin 블록 체인, 자체 환경, 로컬 및 원격 TEE 및 Teechan 이중 채널 프로토콜을 실행하는 코드를 신뢰한다고 가정한다. 당사자와 타사 소프트웨어 스택 (TEE 외부) 사이의 네트워크 및 하드웨어와 같은 나머지 시스템은 신뢰할 수 없다. 따라서 프로토콜 실행 중에 모든 당사자는 (i) 메모리에 있거나 디스크에 저장된 모든 데이터에 액세스하거나 수정합니다. (ii) 응용 프로그램 코드를 보거나 수정합니다. (iii) OS 및 기타 권한있는 소프트웨어의 모든 측면을 제어합니다. 
 
-<p>Here is an example of a pre code block</p>
+우리의 위협 모델은 서비스 거부 공격이나 사이드 채널 공격을 고려하지 않습니다. 실제로 이러한 것들은 악용하기가 어렵고, 완화 될 수 있으며,이 논문의 범위를 벗어나는 별도의 연구 주제가 있다.
 
-<pre><code>tell application "Foo"
-    beep
-end tell
-</code></pre>
+### 목표
 
-<p>This is an <a href="#">example link</a>.</p>
-
-<p>I start my morning with a cup of coffee and
-<a href="http://www.nytimes.com/">The New York Times</a>.</p>
-
-### Code snippet
-
-{% highlight python %}
-if __name__ =='__main__':
-    img_thread = threading.Thread(target=downloadWallpaper)
-    img_thread.start()
-    st = '\rDownloading Image'
-    current = 1
-    while img_thread.is_alive():
-        sys.stdout.write(st+'.'*((current)%5))
-        current=current+1
-        time.sleep(0.3)
-    img_thread.join()
-    print('\nImage of the day downloaded.')
-{% endhighlight %}
-
-<!--
-
-
-<p><small>This demo page has been used from <a href="http://jasonm23.github.io/markdown-css-themes/" target="_blank">http://jasonm23.github.io/markdown-css-themes/</a>.</small></p>
-
-<h1>A First Level Header</h1>
-
-<h2>A Second Level Header</h2>
-
-<h3>A Third Level Header</h3>
-
-<h4>A Fourth Level Header</h4>
-
-<h5>A Fifth Level Header</h5>
-
-<h6>A Sixed Level Header</h6>
-
-<p>Now is the time for all good men to come to
-the aid of their country. This is just a
-regular paragraph.</p>
-
-<p>The quick brown fox jumped over the lazy
-dog&rsquo;s back.</p>
-
-<hr />
-
-<h3>Header 3</h3>
-
-<blockquote><p>This is a blockquote with two paragraphs. Lorem ipsum dolor sit amet,
-consectetuer adipiscing elit. Aliquam hendrerit mi posuere lectus.
-Vestibulum enim wisi, viverra nec, fringilla in, laoreet vitae, risus.</p>
-
-<p>Donec sit amet nisl. Aliquam semper ipsum sit amet velit. Suspendisse
-id sem consectetuer libero luctus adipiscing.</p>
-
-<h2>This is an H2 in a blockquote</h2>
-
-<p>This is the first level of quoting.</p>
-
-<blockquote><p>This is nested blockquote.</p></blockquote>
-
-<p>Back to the first level.</p></blockquote>
-
-<p>Some of these words <em>are emphasized</em>.
-Some of these words <em>are emphasized also</em>.</p>
-
-<p>Use two asterisks for <strong>strong emphasis</strong>.
-Or, if you prefer, <strong>use two underscores instead</strong>.</p>
-
-<ul>
-<li>Candy.</li>
-<li>Gum.</li>
-<li>Booze.</li>
-<li>Red</li>
-<li>Green</li>
-<li><p>Blue</p></li>
-<li><p>A list item.</p></li>
-</ul>
-
-
-<p>With multiple paragraphs.</p>
-
-<ul>
-<li><p>Another item in the list.</p></li>
-<li><p>This is a list item with two paragraphs. Lorem ipsum dolor
-sit amet, consectetuer adipiscing elit. Aliquam hendrerit
-mi posuere lectus.</p></li>
-</ul>
-
-
-<p>Vestibulum enim wisi, viverra nec, fringilla in, laoreet
-vitae, risus. Donec sit amet nisl. Aliquam semper ipsum
-sit amet velit.*   Suspendisse id sem consectetuer libero luctus adipiscing.</p>
-
-<ul>
-<li>This is a list item with two paragraphs.</li>
-</ul>
-
-<p>This is the second paragraph in the list item. You&rsquo;re
-only required to indent the first line. Lorem ipsum dolor
-sit amet, consectetuer adipiscing elit.</p>
-
-<ul>
-<li><p>Another item in the same list.</p></li>
-<li><p>A list item with a bit of <code>code</code> inline.</p></li>
-<li><p>A list item with a blockquote:</p>
-
-<blockquote><p>This is a blockquote
-inside a list item.</p></blockquote></li>
-</ul>
-
-
-<p>Here is an example of a pre code block</p>
-
-<pre><code>tell application "Foo"
-    beep
-end tell
-</code></pre>
-
-<p>This is an <a href="#">example link</a>.</p>
-
-<p>I start my morning with a cup of coffee and
-<a href="http://www.nytimes.com/">The New York Times</a>.</p>
-
-### Code snippet
-
-{% highlight python %}
-if __name__ =='__main__':
-    img_thread = threading.Thread(target=downloadWallpaper)
-    img_thread.start()
-    st = '\rDownloading Image'
-    current = 1
-    while img_thread.is_alive():
-        sys.stdout.write(st+'.'*((current)%5))
-        current=current+1
-        time.sleep(0.3)
-    img_thread.join()
-    print('\nImage of the day downloaded.')
-{% endhighlight %}
-
--->
+지불 채널은 다음과 같이 작동해야합니다. 채널은 각 당사자가 금액을 신용으로 예치하는 블록 체인의 설정 트랜잭션(setup transaction)으로 만들어진다. 채널이 열려있는 동안, 각 당사자는 지불 자로부터 수취인에게 전송 된 트랜잭션 메시지를 통해 거래 상대방에게 지불 할 수 있다. 지불은 당사자가 승인 한 경우에만 청구 할 수 있습니다. 즉, 도용이 불가능해야합니다. 어느 시점에서든 채널에는 각 방향에서 지불 한 금액 간의 차이를 반영해야하는 균형이 있습니다. 잔액은 어느 방향으로도 신용을 초과해서는 안됩니다. 각 당사자는 언제든지 채널을 종료하고 블록 체인에있는 종료 트랜잭션을 사용하여 잔액을 해결할 수 있습니다. 종결 거래는 종단 계약자가 행한 모든 지불 및 거래 상대방으로부터 종결 계약자가 수령 한 모든 지불로 구성된 잔액을 반영합니다. 실패는 실패한 당사자에게 부정적인 영향을줍니다. 당사자는 채널 설정 및 결제 시점에 Bitcoin 네트워크와 동기화해야합니다. 특히 채널 수명 동안 블록 체인을 모니터링 할 필요가 없습니다.
+�다.
