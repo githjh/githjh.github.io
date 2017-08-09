@@ -6,7 +6,7 @@ html header: <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/
 
 ---
 test
-## 초록.
+## abstract.
 
 블록 체인 프로토콜은 본질적으로 트랜잭션 처리량과 대기 시간이 제한 된다. 성능과 스케일을 다루는 최근의 노력은 오프 체인 (off-chain) 지불 채널에 초점을 맞추고 있다. 이러한 채널은 낮은 대기 시간과 높은 처리량을 달성 할 수 있지만 Bitcoin 블록 체인 위에 안전하게 배포하는 것은 어렵다. 부분적으로는 안전한 구현을 위해서는 기본 프로토콜과 생태계를 변경해야하기 때문이다. 
 
