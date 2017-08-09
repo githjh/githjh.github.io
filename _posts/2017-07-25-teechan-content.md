@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Teechan: Payment Channels Using Trusted Execution Environments
+title:Teechan Payment Channels Using Trusted Execution Environments
 categories: others
 html header: <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
